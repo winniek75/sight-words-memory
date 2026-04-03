@@ -13,6 +13,12 @@ export default function App() {
     setPhase('game')
   }
 
+  const handleBack = () => {
+    setPhase('setup')
+    setPlayers([])
+    setFinalScores([])
+  }
+
   const handleEnd = (scores) => {
     setFinalScores(scores)
     setPhase('result')
@@ -27,7 +33,7 @@ export default function App() {
   return (
     <div className="app">
       {phase === 'setup'  && <PlayerSetup onStart={handleStart} />}
-      {phase === 'game'   && <GameBoard players={players} onEnd={handleEnd} />}
+      {phase === 'game'   && <GameBoard players={players} onEnd={handleEnd} onBack={handleBack} />}
       {phase === 'result' && (
         <ResultScreen players={players} scores={finalScores} onRestart={handleRestart} />
       )}

@@ -89,7 +89,27 @@
   50%       { transform: translateY(4px); }
 }
 
+/* Back button in score bar */
+.sb-back-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.8rem;
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.sb-back-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
 @media (max-width: 600px) {
   .sb-title { font-size: 0.9rem; }
   .pc-name  { font-size: 0.7rem; }
+  .sb-back-btn { font-size: 0.7rem; padding: 4px 8px; }
 }

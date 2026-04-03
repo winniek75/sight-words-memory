@@ -1,9 +1,10 @@
 import { PLAYER_COLORS, PLAYER_EMOJIS } from '../data/sightWords'
 import './ScoreBar.css'
 
-export default function ScoreBar({ players, scores, currentPlayer, pairsLeft }) {
+export default function ScoreBar({ players, scores, currentPlayer, pairsLeft, onBack }) {
   return (
     <header className="score-bar">
+      <button className="sb-back-btn" onClick={onBack}>← もどる</button>
       <span className="sb-title">🎴 Sight Words Memory</span>
 
       <div className="sb-players">

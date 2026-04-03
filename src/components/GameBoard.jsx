@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Card from './Card'
 import ScoreBar from './ScoreBar'
 import { SIGHT_WORDS, CARD_COLORS } from '../data/sightWords'
+import { playCorrect, playWrong } from '../utils/sounds'
 import './GameBoard.css'
 
 const DIFFICULTY = {
@@ -34,7 +35,7 @@ function buildCards(pairs) {
   }))
 }
 
-export default function GameBoard({ players, onEnd }) {
+export default function GameBoard({ players, onEnd, onBack }) {
   const [difficulty, setDifficulty] = useState(null)
   const [cards,          setCards]          = useState([])
   const [flipped,        setFlipped]        = useState([])     // card IDs face-up but unresolved
@@ -88,6 +89,7 @@ export default function GameBoard({ players, onEnd }) {
     if (c1.wordId === c2.wordId) {
       // ✅ Match
       setTimeout(() => {
+        playCorrect()
         setCelebrating([c1.wordId])
         setMatched(prev => new Set([...prev, c1.wordId]))
         setScores(prev => {
@@ -103,6 +105,7 @@ export default function GameBoard({ players, onEnd }) {
     } else {
       // ❌ No match — shake then flip back
       setTimeout(() => {
+        playWrong()
         setShaking([id1, id2])
         setTimeout(() => {
           setShaking([])
@@ -118,6 +121,7 @@ export default function GameBoard({ players, onEnd }) {
   if (!difficulty) {
     return (
       <div className="diff-screen">
+        <button className="back-btn" onClick={onBack}>← もどる</button>
         <div className="diff-heading-wrap">
           <h2 className="diff-heading">むずかしさを えらんでね！</h2>
         </div>
@@ -148,6 +152,7 @@ export default function GameBoard({ players, onEnd }) {
         scores={scores}
         currentPlayer={currentPlayer}
         pairsLeft={pairsLeft}
+        onBack={onBack}
       />
 
       <div className={`cards-grid cols-${cols}`}>
