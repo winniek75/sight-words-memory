@@ -1,0 +1,47 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --pink:   #FF3CAC;
+  --yellow: #FFE600;
+  --blue:   #00C2FF;
+  --green:  #00FF87;
+  --purple: #7C3AED;
+  --orange: #FF6B35;
+  --black:  #111111;
+  --white:  #FFFFFF;
+  --shadow: 4px 4px 0 var(--black);
+  --border: 3px solid var(--black);
+  --radius: 14px;
+
+  font-family: 'Baloo 2', cursive;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background-color: #FFF700;
+  background-image:
+    radial-gradient(ellipse at 8% 8%,   #FF3CAC55 0%, transparent 45%),
+    radial-gradient(ellipse at 92% 15%,  #00C2FF44 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 95%,  #7C3AED44 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 60%,  #00FF8733 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* Polka dot overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.055) 2px, transparent 2px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root { position: relative; z-index: 1; }
+.app  { min-height: 100vh; }
