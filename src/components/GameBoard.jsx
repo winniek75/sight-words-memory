@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Card from './Card'
 import ScoreBar from './ScoreBar'
-import { SIGHT_WORDS, CARD_COLORS } from '../data/sightWords'
+import { CARD_COLORS } from '../data/sightWords'
 import { playCorrect, playWrong } from '../utils/sounds'
 import './GameBoard.css'
 
@@ -20,8 +20,8 @@ function shuffle(arr) {
   return a
 }
 
-function buildCards(pairs) {
-  const words = shuffle(SIGHT_WORDS).slice(0, pairs)
+function buildCards(pairs, wordPool) {
+  const words = shuffle(wordPool).slice(0, pairs)
   const raw = words.flatMap((word, i) => [
     { id: i * 2,     wordId: i, word, color: CARD_COLORS[i] },
     { id: i * 2 + 1, wordId: i, word, color: CARD_COLORS[i] },
@@ -35,7 +35,7 @@ function buildCards(pairs) {
   }))
 }
 
-export default function GameBoard({ players, onEnd, onBack }) {
+export default function GameBoard({ players, wordPool, onEnd, onBack }) {
   const [difficulty, setDifficulty] = useState(null)
   const [cards,          setCards]          = useState([])
   const [flipped,        setFlipped]        = useState([])     // card IDs face-up but unresolved
@@ -58,7 +58,8 @@ export default function GameBoard({ players, onEnd, onBack }) {
   }, [matched.size, cards.length, onEnd])
 
   const startGame = (diff) => {
-    const newCards = buildCards(DIFFICULTY[diff].pairs)
+    const maxPairs = Math.min(DIFFICULTY[diff].pairs, wordPool.length)
+    const newCards = buildCards(maxPairs, wordPool)
     setDifficulty(diff)
     setCards(newCards)
     setFlipped([])
@@ -126,17 +127,20 @@ export default function GameBoard({ players, onEnd, onBack }) {
           <h2 className="diff-heading">むずかしさを えらんでね！</h2>
         </div>
         <div className="diff-options">
-          {Object.entries(DIFFICULTY).map(([key, val]) => (
-            <button
-              key={key}
-              className={`diff-btn ${val.cls}`}
-              onClick={() => startGame(key)}
-            >
-              <span className="diff-emoji">{val.emoji}</span>
-              <span className="diff-label">{val.label}</span>
-              <span className="diff-count">{val.pairs}ペア / {val.pairs * 2}まい</span>
-            </button>
-          ))}
+          {Object.entries(DIFFICULTY).map(([key, val]) => {
+            const pairs = Math.min(val.pairs, wordPool.length)
+            return (
+              <button
+                key={key}
+                className={`diff-btn ${val.cls}`}
+                onClick={() => startGame(key)}
+              >
+                <span className="diff-emoji">{val.emoji}</span>
+                <span className="diff-label">{val.label}</span>
+                <span className="diff-count">{pairs}ペア / {pairs * 2}まい</span>
+              </button>
+            )
+          })}
         </div>
       </div>
     )
