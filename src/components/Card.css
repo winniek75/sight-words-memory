@@ -128,8 +128,10 @@
   filter: brightness(1.08) saturate(0.85);
 }
 
-.card.matched .c-facedown {
+.card.matched .c-facedown,
+.card.flipped .c-facedown {
   opacity: 0;
+  visibility: hidden;
 }
 
 /* ── Shake animation (wrong pair) ─────────────────────── */
