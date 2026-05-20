@@ -176,6 +176,21 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
           ))}
         </div>
 
+        {/* Near-miss / Perfect feedback */}
+        {(() => {
+          // In memory game, "perfect" = fewest misses. We approximate with single-player score ratio.
+          const totalCards = totalPairs
+          const bestPlayerScore = maxScore
+          const pct = totalCards > 0 ? Math.round((bestPlayerScore / totalCards) * 100) : 0
+          if (pct === 100) {
+            return <div className="near-miss-feedback perfect-glow">PERFECT! 💎</div>
+          } else if (pct >= 80) {
+            const remaining = totalCards - bestPlayerScore
+            return <div className="near-miss-feedback near-miss-text">あと{remaining}ペアでパーフェクト！もう一回？</div>
+          }
+          return null
+        })()}
+
         {best && (
           <div className="best-records">
             <h3 className="best-title">Best Records</h3>

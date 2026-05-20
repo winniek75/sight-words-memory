@@ -45,6 +45,8 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
   const [disabled,       setDisabled]       = useState(false)
   const [shaking,        setShaking]        = useState([])
   const [celebrating,    setCelebrating]    = useState([])
+  const [combo,          setCombo]          = useState(0)
+  const [comboOverlay,   setComboOverlay]   = useState(null) // { text, key }
 
   const startTimeRef = useRef(null)
 
@@ -74,6 +76,8 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
     setDisabled(false)
     setShaking([])
     setCelebrating([])
+    setCombo(0)
+    setComboOverlay(null)
   }
 
   const handleCardClick = useCallback((cardId) => {
@@ -101,6 +105,16 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
         setScores(prev => {
           const s = [...prev]; s[currentPlayer]++; return s
         })
+        // Combo tracking
+        setCombo(prev => {
+          const next = prev + 1
+          const milestones = { 3: 'NICE! 🔥', 5: 'GREAT! ⚡', 7: 'AMAZING! 🌟', 10: 'UNSTOPPABLE! 💥' }
+          if (milestones[next]) {
+            setComboOverlay({ text: milestones[next], key: Date.now() })
+            setTimeout(() => setComboOverlay(null), 1500)
+          }
+          return next
+        })
         setTimeout(() => {
           setCelebrating([])
           setFlipped([])
@@ -114,6 +128,7 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
       setTimeout(() => {
         playWrong()
         setShaking([id1, id2])
+        setCombo(0) // reset combo on miss
         setTimeout(() => {
           setShaking([])
           setFlipped([])
@@ -164,6 +179,10 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
         pairsLeft={pairsLeft}
         onBack={onBack}
       />
+
+      {comboOverlay && (
+        <div key={comboOverlay.key} className="combo-overlay">{comboOverlay.text}</div>
+      )}
 
       <div className={`cards-grid cols-${cols}`}>
         {cards.map(card => (
