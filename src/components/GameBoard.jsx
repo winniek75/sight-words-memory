@@ -110,6 +110,7 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
       }, 350)
     } else {
       // ❌ No match — shake then flip back
+      if (window.WiseXP) window.WiseXP.reportWrong({ question: c1.word, correct: c1.word, playerAnswer: c2.word });
       setTimeout(() => {
         playWrong()
         setShaking([id1, id2])

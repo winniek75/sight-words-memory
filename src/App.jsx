@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PlayerSetup from './components/PlayerSetup'
 import CategorySelect from './components/CategorySelect'
 import GameBoard from './components/GameBoard'
 import ResultScreen from './components/ResultScreen'
 
 export default function App() {
+  useEffect(() => {
+    if (window.WiseXP) window.WiseXP.init('sight-words-memory');
+  }, []);
+
   const [phase, setPhase] = useState('setup')
   const [players, setPlayers] = useState([])
   const [selectedWords, setSelectedWords] = useState([])
@@ -38,6 +42,10 @@ export default function App() {
     setFinalScores(scores)
     setElapsedTime(elapsed || 0)
     setPhase('result')
+    if (window.WiseXP) {
+      const totalScore = scores.reduce((a, b) => a + b, 0);
+      window.WiseXP.reportGame({ score: totalScore, correct: totalScore, total: totalScore, maxCombo: 0, grade: 'memory' });
+    }
   }
 
   const handleRestart = () => {
