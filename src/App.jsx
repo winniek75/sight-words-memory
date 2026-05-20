@@ -9,6 +9,7 @@ export default function App() {
   const [players, setPlayers] = useState([])
   const [selectedWords, setSelectedWords] = useState([])
   const [finalScores, setFinalScores] = useState([])
+  const [elapsedTime, setElapsedTime] = useState(0)
 
   const handleStart = (playerNames) => {
     setPlayers(playerNames)
@@ -25,6 +26,7 @@ export default function App() {
     setPlayers([])
     setSelectedWords([])
     setFinalScores([])
+    setElapsedTime(0)
   }
 
   const handleBackToCategory = () => {
@@ -32,8 +34,9 @@ export default function App() {
     setSelectedWords([])
   }
 
-  const handleEnd = (scores) => {
+  const handleEnd = (scores, elapsed) => {
     setFinalScores(scores)
+    setElapsedTime(elapsed || 0)
     setPhase('result')
   }
 
@@ -42,6 +45,7 @@ export default function App() {
     setPlayers([])
     setSelectedWords([])
     setFinalScores([])
+    setElapsedTime(0)
   }
 
   return (
@@ -59,7 +63,7 @@ export default function App() {
         />
       )}
       {phase === 'result'   && (
-        <ResultScreen players={players} scores={finalScores} onRestart={handleRestart} />
+        <ResultScreen players={players} scores={finalScores} elapsedTime={elapsedTime} onRestart={handleRestart} />
       )}
     </div>
   )

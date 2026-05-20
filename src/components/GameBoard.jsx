@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Card from './Card'
 import ScoreBar from './ScoreBar'
 import { CARD_COLORS } from '../data/sightWords'
-import { playCorrect, playWrong } from '../utils/sounds'
+import { playCorrect, playWrong, playCelebration } from '../utils/sounds'
 import './GameBoard.css'
 
 const DIFFICULTY = {
@@ -46,6 +46,8 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
   const [shaking,        setShaking]        = useState([])
   const [celebrating,    setCelebrating]    = useState([])
 
+  const startTimeRef = useRef(null)
+
   // Keep a ref to latest scores to avoid stale closure in game-over timeout
   const scoresRef = useRef(scores)
   useEffect(() => { scoresRef.current = scores }, [scores])
@@ -53,13 +55,16 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
   // Game-over detection
   useEffect(() => {
     if (cards.length > 0 && matched.size === cards.length / 2) {
-      setTimeout(() => onEnd(scoresRef.current), 1300)
+      playCelebration()
+      const elapsed = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0
+      setTimeout(() => onEnd(scoresRef.current, elapsed), 1300)
     }
   }, [matched.size, cards.length, onEnd])
 
   const startGame = (diff) => {
     const maxPairs = Math.min(DIFFICULTY[diff].pairs, wordPool.length)
     const newCards = buildCards(maxPairs, wordPool)
+    startTimeRef.current = Date.now()
     setDifficulty(diff)
     setCards(newCards)
     setFlipped([])

@@ -134,6 +134,89 @@
   box-shadow: 3px 3px 0 #111;
 }
 
+/* Time display */
+.result-time {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* NEW BEST badge */
+.new-record-badge {
+  display: inline-block;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.65rem;
+  color: #fff;
+  background: linear-gradient(135deg, #FF3CAC, #FF6B35);
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  animation: badge-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Best records section */
+.best-records {
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.best-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  color: #7C3AED;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.best-grid {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.best-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 80px;
+}
+
+.best-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.best-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: #111;
+}
+
+.best-who {
+  font-size: 0.7rem;
+  color: #999;
+}
+
 @media (max-width: 480px) {
   .result-card      { padding: 28px 20px 24px; }
   .result-heading   { font-size: 1.4rem; }
