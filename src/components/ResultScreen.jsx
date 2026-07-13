@@ -43,6 +43,19 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
   const winners   = rankings.filter(p => p.score === maxScore)
   const isTie     = winners.length > 1
 
+  // → MoWISE portal へスコア送信 (WiseGame Bridge)
+  useEffect(() => {
+    try {
+      window.WiseGame && window.WiseGame.reportComplete({
+        score: maxScore, maxScore: totalPairs || maxScore,
+        accuracy: totalPairs > 0 ? Math.round((maxScore / totalPairs) * 100) : 100,
+        timeSpent: elapsedTime,
+        metadata: { players: players.length, totalPairs }
+      });
+    } catch (e) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Save best score/time on mount
   useEffect(() => {
     const prev = loadBest()
