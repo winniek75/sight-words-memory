@@ -50,7 +50,7 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
         score: maxScore, maxScore: totalPairs || maxScore,
         accuracy: totalPairs > 0 ? Math.round((maxScore / totalPairs) * 100) : 100,
         timeSpent: elapsedTime,
-        metadata: { players: players.length, totalPairs }
+        metadata: { players: players.length, totalPairs, wrongAnswers: [] }
       });
     } catch (e) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
