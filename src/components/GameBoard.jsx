@@ -5,7 +5,8 @@ import { CARD_COLORS } from '../data/sightWords'
 import { playCorrect, playWrong, playCelebration } from '../utils/sounds'
 import './GameBoard.css'
 
-const DIFFICULTY = {
+export const DIFFICULTY = {
+  first:  { pairs: 4,  label: 'はじめて',     emoji: '🐣', cls: 'diff-first' },
   easy:   { pairs: 8,  label: 'かんたん',     emoji: '🌟', cls: 'diff-easy' },
   normal: { pairs: 12, label: 'ふつう',       emoji: '🎯', cls: 'diff-normal' },
   hard:   { pairs: 16, label: 'むずかしい',   emoji: '🔥', cls: 'diff-hard' },
@@ -35,7 +36,12 @@ function buildCards(pairs, wordPool) {
   }))
 }
 
-export default function GameBoard({ players, wordPool, onEnd, onBack }) {
+export function difficultyForPairs(pairs) {
+  const hit = Object.entries(DIFFICULTY).find(([, v]) => v.pairs === pairs)
+  return hit ? hit[0] : null
+}
+
+export default function GameBoard({ players, wordPool, initialDifficulty, onEnd, onBack }) {
   const [difficulty, setDifficulty] = useState(null)
   const [cards,          setCards]          = useState([])
   const [flipped,        setFlipped]        = useState([])     // card IDs face-up but unresolved
@@ -48,7 +54,11 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
   const [combo,          setCombo]          = useState(0)
   const [comboOverlay,   setComboOverlay]   = useState(null) // { text, key }
 
+  const [misses,         setMisses]         = useState(0)    // めくりなおし（位置の取り違え）の回数
+
   const startTimeRef = useRef(null)
+  const missesRef = useRef(0)
+  useEffect(() => { missesRef.current = misses }, [misses])
 
   // Keep a ref to latest scores to avoid stale closure in game-over timeout
   const scoresRef = useRef(scores)
@@ -59,7 +69,11 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
     if (cards.length > 0 && matched.size === cards.length / 2) {
       playCelebration()
       const elapsed = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0
-      setTimeout(() => onEnd(scoresRef.current, elapsed), 1300)
+      // このゲームで出てきた単語（終了後の「きいて えらぶ」ミニ確認に使う）
+      const seen = new Set()
+      const words = cards.filter(c => !seen.has(c.wordId) && seen.add(c.wordId)).map(c => c.word)
+      const t = setTimeout(() => onEnd(scoresRef.current, elapsed, words, missesRef.current), 1300)
+      return () => clearTimeout(t)
     }
   }, [matched.size, cards.length, onEnd])
 
@@ -78,7 +92,14 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
     setCelebrating([])
     setCombo(0)
     setComboOverlay(null)
+    setMisses(0)
   }
+
+  // ディープリンク（?pairs=）でペア数が指定されていたら、えらぶ画面をとばして開始
+  useEffect(() => {
+    if (initialDifficulty && DIFFICULTY[initialDifficulty]) startGame(initialDifficulty)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCardClick = useCallback((cardId) => {
     if (disabled) return
@@ -124,11 +145,13 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
       }, 350)
     } else {
       // ❌ No match — shake then flip back
-      if (window.WiseXP) window.WiseXP.reportWrong({ question: c1.word, correct: c1.word, playerAnswer: c2.word });
+      // 神経衰弱のめくり間違いは「位置の取り違え」であって英語の誤答ではないので、
+      // 苦手問題（WiseXP.reportWrong）には送らない。学習記録は終了後のミニ確認だけで作る。
       setTimeout(() => {
         playWrong()
         setShaking([id1, id2])
         setCombo(0) // reset combo on miss
+        setMisses(m => m + 1)
         setTimeout(() => {
           setShaking([])
           setFlipped([])
@@ -146,6 +169,7 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
         <button className="back-btn" onClick={onBack}>← もどる</button>
         <div className="diff-heading-wrap">
           <h2 className="diff-heading">むずかしさを えらんでね！</h2>
+          <p className="diff-sub">おなじ ことばの カードを 2まい みつけよう</p>
         </div>
         <div className="diff-options">
           {Object.entries(DIFFICULTY).map(([key, val]) => {
@@ -167,7 +191,7 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
     )
   }
 
-  const cols = difficulty === 'easy' ? 4 : 6
+  const cols = (difficulty === 'easy' || difficulty === 'first') ? 4 : 6
   const pairsLeft = (cards.length / 2) - matched.size
 
   return (
@@ -177,6 +201,7 @@ export default function GameBoard({ players, wordPool, onEnd, onBack }) {
         scores={scores}
         currentPlayer={currentPlayer}
         pairsLeft={pairsLeft}
+        misses={misses}
         onBack={onBack}
       />
 

@@ -1,7 +1,7 @@
 import { PLAYER_COLORS, PLAYER_EMOJIS } from '../data/sightWords'
 import './ScoreBar.css'
 
-export default function ScoreBar({ players, scores, currentPlayer, pairsLeft, onBack }) {
+export default function ScoreBar({ players, scores, currentPlayer, pairsLeft, misses = 0, onBack }) {
   return (
     <header className="score-bar">
       <button className="sb-back-btn" onClick={onBack}>← もどる</button>
@@ -24,7 +24,10 @@ export default function ScoreBar({ players, scores, currentPlayer, pairsLeft, on
         ))}
       </div>
 
-      <span className="sb-left">のこり {pairsLeft}</span>
+      <span className="sb-left">
+        のこり {pairsLeft}
+        {players.length === 1 && <> ・ めくりなおし {misses}</>}
+      </span>
     </header>
   )
 }
