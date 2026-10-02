@@ -25,19 +25,22 @@ export default function PlayerSetup({ onStart }) {
           <span className="st-top">👀 SIGHT WORDS</span>
           <span className="st-bot">MEMORY 🎴</span>
         </h1>
-        <p className="setup-sub">えいごの かるた ゲーム！</p>
+        <p className="setup-sub">
+          えいごの カードあわせ（しんけいすいじゃく）<br />
+          めくると えいごが きこえるよ。おなじ ことばを 2まい みつけよう！
+        </p>
 
         {/* Player count */}
         <section className="setup-section">
           <h2 className="setup-label">👥 なんにんで あそぶ？</h2>
           <div className="count-row">
-            {[2, 3, 4].map(n => (
+            {[1, 2, 3, 4].map(n => (
               <button
                 key={n}
                 className={`count-btn ${count === n ? 'active' : ''}`}
                 onClick={() => setCount(n)}
               >
-                {n} にん
+                {n === 1 ? 'ひとり' : `${n} にん`}
               </button>
             ))}
           </div>
@@ -68,6 +71,10 @@ export default function PlayerSetup({ onStart }) {
         <button className="start-btn" onClick={handleStart}>
           🎮 スタート！
         </button>
+
+        <a className="home-link" href="https://wise-english-portal.vercel.app">
+          🏠 学習ホームにもどる
+        </a>
       </div>
     </div>
   )

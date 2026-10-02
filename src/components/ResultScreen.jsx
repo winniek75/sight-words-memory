@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { PLAYER_COLORS, PLAYER_EMOJIS } from '../data/sightWords'
+import { speak } from '../utils/speech'
 import './ResultScreen.css'
 
 const MEDALS = ['🥇', '🥈', '🥉', '4️⃣']
@@ -28,7 +29,7 @@ function formatTime(seconds) {
   return m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`
 }
 
-export default function ResultScreen({ players, scores, elapsedTime, onRestart }) {
+export default function ResultScreen({ players, scores, elapsedTime, misses = 0, quiz, onRestart }) {
   const canvasRef = useRef(null)
   const [isNewBestScore, setIsNewBestScore] = useState(false)
   const [isNewBestTime, setIsNewBestTime] = useState(false)
@@ -42,15 +43,27 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
   const totalPairs = scores.reduce((a, b) => a + b, 0)
   const winners   = rankings.filter(p => p.score === maxScore)
   const isTie     = winners.length > 1
+  const isSolo    = players.length === 1
+
+  // 学習記録は終了後の「きいて えらぶ」ミニ確認の正誤だけ
+  const quizCorrect = quiz?.correct || 0
+  const quizTotal   = quiz?.total || 0
+  const quizWrong   = quiz?.wrong || []
 
   // → MoWISE portal へスコア送信 (WiseGame Bridge)
   useEffect(() => {
     try {
       window.WiseGame && window.WiseGame.reportComplete({
-        score: maxScore, maxScore: totalPairs || maxScore,
-        accuracy: totalPairs > 0 ? Math.round((maxScore / totalPairs) * 100) : 100,
+        score: quizCorrect, maxScore: quizTotal,
+        accuracy: quizTotal > 0 ? Math.round((quizCorrect / quizTotal) * 100) : 0,
         timeSpent: elapsedTime,
-        metadata: { players: players.length, totalPairs, wrongAnswers: [] }
+        metadata: {
+          players: players.length, totalPairs, flipMisses: misses,
+          correct: quizCorrect, total: quizTotal,
+          wrongAnswers: quizWrong.map(w => ({
+            q: `🔊 ${w.word.en}（${w.word.ja}）`, correct: w.word.en, chosen: w.chosen, tag: 'sight_word'
+          }))
+        }
       });
     } catch (e) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,11 +165,13 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
 
       <div className="result-card">
         <div className="result-trophy">
-          {isTie ? '🤝' : '🏆'}
+          {isSolo ? '🎉' : isTie ? '🤝' : '🏆'}
         </div>
 
         <h1 className="result-heading">
-          {isTie
+          {isSolo
+            ? 'ぜんぶ そろった！'
+            : isTie
             ? `${winners.map(w => w.name).join(' & ')} ひきわけ！`
             : `${winners[0].name} の かち！`}
         </h1>
@@ -189,8 +204,33 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
           ))}
         </div>
 
-        {/* Near-miss / Perfect feedback */}
-        {(() => {
+        {isSolo && (
+          <p className="result-misses">
+            {misses === 0 ? 'めくりなおし 0かい！ すごい！' : `めくりなおし ${misses}かい`}
+          </p>
+        )}
+
+        {quizTotal > 0 && (
+          <div className="quiz-result">
+            <h3 className="quiz-result-title">🎧 きいて えらぶ ミニかくにん</h3>
+            <p className="quiz-result-score">{quizCorrect} / {quizTotal} もん せいかい</p>
+            {quizWrong.length > 0 && (
+              <>
+                <p className="quiz-result-note">もういちど きいてみよう</p>
+                <div className="quiz-result-words">
+                  {quizWrong.map(w => (
+                    <button key={w.word.en} className="quiz-result-word" onClick={() => speak(w.word.en)}>
+                      🔊 {w.word.en} <small>{w.word.ja}</small>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Near-miss / Perfect feedback (multiplayer only: one player took most pairs) */}
+        {!isSolo && (() => {
           // In memory game, "perfect" = fewest misses. We approximate with single-player score ratio.
           const totalCards = totalPairs
           const bestPlayerScore = maxScore
@@ -231,6 +271,10 @@ export default function ResultScreen({ players, scores, elapsedTime, onRestart }
         <button className="restart-btn" onClick={onRestart}>
           🔄 もう一かい！
         </button>
+
+        <a className="home-link" href="https://wise-english-portal.vercel.app">
+          🏠 学習ホームにもどる
+        </a>
       </div>
     </div>
   )
